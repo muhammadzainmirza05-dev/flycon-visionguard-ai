@@ -1,0 +1,9 @@
+yolo_env/
+video and images/
+__pycache__/
+*.pyc
+*.pt
+*.mp4
+*.avi
+runs/
+.env
