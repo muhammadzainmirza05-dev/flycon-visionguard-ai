@@ -1,65 +1,45 @@
 import cv2
 
-# Step 1: Open the video file
+# Load up the sample footage (note: check if the .mp4.mp4 extension was a typo later)
 video_path = r"C:\Users\muham\Documents\Codes\Flycon Internship\sample_cctv.mp4.mp4"
 cap = cv2.VideoCapture(video_path)
 
-# Check if video opened successfully
 if not cap.isOpened():
-    print(
-        f"Error: Could not open video file '{video_path}'. Ensure the file exists in the folder."
-    )
+    print(f"Failed to open {video_path}. Is the path correct?")
     exit()
 
-# Step 2: Extract video properties
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+# Grab some basic video stats for the overlay
+w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-print("=" * 40)
-print(" VisionGuard AI - Video Properties")
-print("=" * 40)
-print(f"Resolution   : {width} x {height}")
-print(f"FPS          : {fps:.2f}")
-print(f"Total Frames : {total_frames}")
-print("=" * 40)
-print("Playing video... Press 'q' on the video window to quit.")
+print(f"Loaded video: {w}x{h} at {fps:.2f} FPS. Total frames: {total_frames}")
+print("Starting feed... hit 'q' to quit.")
 
-# Step 3: Read and display video frame-by-frame
-frame_number = 0
+frame_idx = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
 
-    # If ret is False, the video has reached the end or failed to load
+    # drop out if we hit the end of the file
     if not ret:
-        print("\nEnd of video stream or cannot read the frame.")
+        print("End of stream.")
         break
 
-    frame_number += 1
+    frame_idx += 1
 
-    # Display frame metadata on screen
-    overlay_text = f"Frame: {frame_number}/{total_frames} | Res: {width}x{height} | FPS: {int(fps)}"
-    cv2.putText(
-        frame,
-        overlay_text,
-        (20, 40),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (0, 255, 0),
-        2,
-    )
+    # Put some debug stats on the top left of the video
+    info_text = f"Frame: {frame_idx}/{total_frames} | Res: {w}x{h} | FPS: {int(fps)}"
+    cv2.putText(frame, info_text, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-    # Show the frame in a GUI window
-    cv2.imshow("VisionGuard AI - CCTV Feed", frame)
+    cv2.imshow("CCTV Test Feed", frame)
 
-    # Press 'q' to exit early (30ms delay approximates real-time video speed)
-    if cv2.waitKey(30) & 0xFF == ord("q"):
-        print("\nPlayback interrupted by user.")
+    # 30ms wait keeps it playing at roughly normal speed
+    if cv2.waitKey(30) & 0xFF == ord('q'):
+        print("Playback stopped.")
         break
 
-# Step 4: Release resources cleanly
+# cleanup
 cap.release()
 cv2.destroyAllWindows()
-print("Video processing complete. Windows closed safely.")
